@@ -58,16 +58,18 @@ func (r *Repository) dir(p string, mkdir bool) (string, error) {
 	return p, nil
 }
 
-// for a given path (relative to .git directory), this function
-// returns the absolute path and creates intermediate directories
-// if required
+// same as dir() function, but for a file. It will instantiate the path
+// corresponding to a file. For example: file("a/b/c/HEAD"), will create
+// all the sub-directories, i.e.,`.git/a/b/c/`
 func (r *Repository) file(p string, mkdir bool) (string, error) {
-	// create intermediate directories, if required
+	// only pass the directory path, not the filename itself
+	// to dir() function to create all the sub-directories, if not exists
 	_, err := r.dir(filepath.Dir(p), mkdir)
 	if err != nil {
 		return "", err
 	}
 
+	// cannot return r.dir() path because it does not include file
 	return r.absPath(p), nil
 }
 
@@ -161,6 +163,40 @@ func initializeFile(r *Repository, relPath string, content []byte) error {
 	}
 
 	return nil
+}
+
+// find finds a Git repository recursing up the parent directories
+// until a git repository is found
+func Find(path string) (*Repository, error) {
+	// get the full path of the directory
+	p, err := filepath.Abs(path)
+	if err != nil {
+		return nil, err
+	}
+
+	// if we reach the root directory, we return error
+	if p == "/" {
+		return nil, errors.New("no git repository found")
+	}
+
+	// create path of the git config directory
+	dir := filepath.Join(p, gitPath)
+	if f, err := os.Stat(dir); !os.IsNotExist(err) {
+		if !f.IsDir() {
+			return nil, fmt.Errorf("'%s' is not a directory", dir)
+		}
+
+		// We have found the git directory
+		r, err := NewRepository(p, false)
+		if err != nil {
+			return nil, err
+		}
+
+		return r, nil
+	}
+
+	// walk up the directories
+	return Find(filepath.Join(p, ".."))
 }
 
 // Create initializes an empty git repository for a given path
