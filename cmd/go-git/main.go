@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/shivamdixit/go-git/git"
@@ -16,7 +17,7 @@ const (
 	commit     = "commit"
 	hashObject = "hash-object"
 	initialize = "init"
-	log        = "log"
+	gitLog     = "log" // to not confuse with log package
 	lsTree     = "ls-tree"
 	merge      = "merge"
 	rebase     = "rebase"
@@ -27,8 +28,10 @@ const (
 )
 
 var initCmd *flag.FlagSet
+var catFileCmd *flag.FlagSet
 
 func init() {
+	catFileCmd = flag.NewFlagSet(catFile, flag.ExitOnError)
 	// checkoutCmd := flag.NewFlagSet(checkout, flag.ExitOnError)
 	// commitCmd := flag.NewFlagSet(commit, flag.ExitOnError)
 	// hashObjectCmd := flag.NewFlagSet(hashObject, flag.ExitOnError)
@@ -50,6 +53,22 @@ func initExec(path string) {
 	}
 }
 
+func catFileExec(objectType string, path string) {
+	// fetch the repository from current directory
+	r, err := git.Find(".")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c, err := git.Read(r, path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	result, err := c.Serialize()
+	fmt.Print(result)
+}
+
 func main() {
 	// providing a subcommand is must
 	if len(os.Args) < 2 {
@@ -60,6 +79,10 @@ func main() {
 	switch os.Args[1] {
 	case initialize:
 		initCmd.Parse(os.Args[2:])
+		break
+	case catFile:
+		catFileCmd.Parse(os.Args[2:])
+		break
 	default:
 		flag.PrintDefaults()
 		os.Exit(1)
@@ -80,5 +103,13 @@ func main() {
 		}
 
 		initExec(dir)
+	}
+
+	if catFileCmd.Parsed() {
+		if len(os.Args) < 4 {
+			log.Fatal("missing TYPE or OBJECT")
+		}
+
+		catFileExec(os.Args[2], os.Args[3])
 	}
 }
