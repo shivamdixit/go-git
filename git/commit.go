@@ -1,10 +1,6 @@
 package git
 
-// TODO: define properties in a common struct
-type Commit struct {
-	repo *Repository
-	data string
-}
+type Commit baseObject
 
 func (c Commit) name() string {
 	return ObjectCommit

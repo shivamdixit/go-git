@@ -13,7 +13,14 @@ import (
 	"strconv"
 )
 
-// Object interface represents a generic git object
+// baseObject is the type for all high level objects like
+// commit, tag, blob, etc.
+type baseObject struct {
+	repo *Repository
+	data []byte
+}
+
+// Object interface represents a generic high level git object
 type Object interface {
 	name() string
 	repository() *Repository

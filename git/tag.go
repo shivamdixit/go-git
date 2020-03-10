@@ -1,9 +1,6 @@
 package git
 
-type Tag struct {
-	repo *Repository
-	data string
-}
+type Tag baseObject
 
 func (t Tag) name() string {
 	return ObjectTag

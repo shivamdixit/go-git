@@ -1,9 +1,6 @@
 package git
 
-type Tree struct {
-	repo *Repository
-	data string
-}
+type Tree baseObject
 
 func (t Tree) name() string {
 	return ObjectTree

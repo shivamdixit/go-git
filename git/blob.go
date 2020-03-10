@@ -1,9 +1,6 @@
 package git
 
-type Blob struct {
-	repo *Repository
-	data []byte
-}
+type Blob baseObject
 
 func (b Blob) name() string {
 	return ObjectBlob
