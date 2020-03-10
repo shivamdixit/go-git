@@ -16,8 +16,9 @@ import (
 // Object interface represents a generic git object
 type Object interface {
 	name() string
+	repository() *Repository
 	Serialize() ([]byte, error)
-	deserialize([]byte) error
+	Deserialize([]byte) error
 }
 
 // Different types of objects supported by git
@@ -27,95 +28,6 @@ const (
 	ObjectTag    = "tag"
 	ObjectBlob   = "blob"
 )
-
-// TODO: define properties in a common struct
-type Commit struct {
-	repo *Repository
-	data string
-}
-
-func (c Commit) name() string {
-	return ObjectCommit
-}
-
-func (c Commit) Serialize() ([]byte, error) {
-	return nil, nil
-}
-
-func (c Commit) deserialize(data []byte) error {
-	return nil
-}
-
-func NewCommit(data []byte) Commit {
-	return Commit{}
-}
-
-type Tree struct {
-	repo *Repository
-	data string
-}
-
-func (t Tree) name() string {
-	return ObjectTree
-}
-
-func (t Tree) Serialize() ([]byte, error) {
-	return nil, nil
-}
-
-func (t Tree) deserialize(data []byte) error {
-	return nil
-}
-
-func NewTree(data []byte) *Tree {
-	return &Tree{}
-}
-
-type Tag struct {
-	repo *Repository
-	data string
-}
-
-func (t Tag) name() string {
-	return ObjectTag
-}
-
-func (t Tag) Serialize() ([]byte, error) {
-	return nil, nil
-}
-
-func (t Tag) deserialize(data []byte) error {
-	return nil
-}
-
-func NewTag(data []byte) *Tag {
-	return &Tag{}
-}
-
-type Blob struct {
-	repo *Repository
-	data []byte
-}
-
-func (b Blob) name() string {
-	return ObjectBlob
-}
-
-func (b Blob) Serialize() ([]byte, error) {
-	// blob is a raw data structure and it has no specific format
-	// therefore, just return the raw byte data
-	return b.data, nil
-}
-
-func (b Blob) deserialize(data []byte) error {
-	b.data = data
-
-	return nil
-}
-
-func NewBlob(data []byte) *Blob {
-	return &Blob{}
-}
 
 // Read reads a given git object in a repository
 func Read(r *Repository, sha string) (Object, error) {
@@ -216,7 +128,7 @@ func getHash(o []byte) (string, error) {
 	return hex.EncodeToString(sha[:]), nil
 }
 
-func Write(o Blob) error {
+func Write(o Object) error {
 	// calculate hash of the object and use it as path of the object
 	r, err := raw(o)
 	if err != nil {
@@ -228,7 +140,7 @@ func Write(o Blob) error {
 		return err
 	}
 
-	p, err := o.repo.file(filepath.Join("objects", hash[:2], hash[2:]), true)
+	p, err := o.repository().file(filepath.Join("objects", hash[:2], hash[2:]), true)
 	if err != nil {
 		return err
 	}
