@@ -89,7 +89,7 @@ func Read(r *git.Repository, sha string) (Object, error) {
 	case TypeTag:
 		o = NewTag(rawBytes[j:])
 	case TypeBlob:
-		o = NewBlob(rawBytes[j:])
+		o = NewBlob(rawBytes[j:], r)
 	default:
 		return nil, fmt.Errorf("invalid object type :%s", objType)
 	}
@@ -140,7 +140,7 @@ func Hash(o Object) ([]byte, string, error) {
 func Write(o Object) error {
 	// create a raw object with all headers and create its hash
 	// Hash is used as a path for the object
-	r, hash, err := Hash(o)
+	raw, hash, err := Hash(o)
 	if err != nil {
 		return err
 	}
@@ -153,9 +153,10 @@ func Write(o Object) error {
 	// compress the raw object and write it out to file
 	var b bytes.Buffer
 	w := zlib.NewWriter(&b)
-	defer w.Close()
+	w.Write(raw)
+	// must be closed to flush the buffer
+	w.Close()
 
-	w.Write(r)
 	err = ioutil.WriteFile(p, b.Bytes(), 0644)
 	if err != nil {
 		return err

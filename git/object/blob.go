@@ -24,6 +24,6 @@ func (b Blob) Deserialize(data []byte) error {
 	return nil
 }
 
-func NewBlob(data []byte) *Blob {
-	return &Blob{data: data}
+func NewBlob(data []byte, r *git.Repository) *Blob {
+	return &Blob{data: data, repo: r}
 }

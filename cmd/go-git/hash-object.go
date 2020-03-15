@@ -24,11 +24,13 @@ func hashObjectInit(hashObjectCmd *flag.FlagSet) {
 }
 
 func hashObjectExec(args []string) {
+	var repo *git.Repository
 	if hashObjectWrite == true {
-		_, err := git.Find(".")
+		r, err := git.Find(".")
 		if err != nil {
 			log.Fatal(err)
 		}
+		repo = r
 	}
 
 	data, err := ioutil.ReadFile(args[0])
@@ -39,7 +41,7 @@ func hashObjectExec(args []string) {
 	var o object.Object
 	switch hashObjectType {
 	case object.TypeBlob:
-		o = object.NewBlob(data)
+		o = object.NewBlob(data, repo)
 		break
 	case object.TypeTree:
 		o = object.NewTree(data)
@@ -59,5 +61,9 @@ func hashObjectExec(args []string) {
 		log.Fatal(err)
 	}
 
-	fmt.Print(hash)
+	if hashObjectWrite {
+		object.Write(o)
+	} else {
+		fmt.Print(hash)
+	}
 }
