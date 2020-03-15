@@ -20,6 +20,6 @@ func (t Tree) Deserialize(data []byte) error {
 	return nil
 }
 
-func NewTree(data []byte) *Tree {
-	return &Tree{}
+func NewTree(data []byte, r *git.Repository) *Tree {
+	return &Tree{data: data, repo: r}
 }

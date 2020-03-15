@@ -44,13 +44,13 @@ func hashObjectExec(args []string) {
 		o = object.NewBlob(data, repo)
 		break
 	case object.TypeTree:
-		o = object.NewTree(data)
+		o = object.NewTree(data, repo)
 		break
 	case object.TypeCommit:
-		o = object.NewCommit(data)
+		o = object.NewCommit(data, repo)
 		break
 	case object.TypeTag:
-		o = object.NewTag(data)
+		o = object.NewTag(data, repo)
 		break
 	default:
 		log.Fatalf("invalid object type: %s", hashObjectType)

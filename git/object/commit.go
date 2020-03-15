@@ -20,6 +20,6 @@ func (c Commit) Deserialize(data []byte) error {
 	return nil
 }
 
-func NewCommit(data []byte) Commit {
-	return Commit{}
+func NewCommit(data []byte, r *git.Repository) *Commit {
+	return &Commit{data: data, repo: r}
 }

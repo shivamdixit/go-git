@@ -20,6 +20,6 @@ func (t Tag) Deserialize(data []byte) error {
 	return nil
 }
 
-func NewTag(data []byte) *Tag {
-	return &Tag{}
+func NewTag(data []byte, r *git.Repository) *Tag {
+	return &Tag{data: data, repo: r}
 }

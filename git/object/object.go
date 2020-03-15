@@ -83,11 +83,11 @@ func Read(r *git.Repository, sha string) (Object, error) {
 	var o Object
 	switch string(objType) {
 	case TypeCommit:
-		o = NewCommit(rawBytes[j:])
+		o = NewCommit(rawBytes[j:], r)
 	case TypeTree:
-		o = NewTree(rawBytes[j:])
+		o = NewTree(rawBytes[j:], r)
 	case TypeTag:
-		o = NewTag(rawBytes[j:])
+		o = NewTag(rawBytes[j:], r)
 	case TypeBlob:
 		o = NewBlob(rawBytes[j:], r)
 	default:
