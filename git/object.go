@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"compress/zlib"
 	"crypto/sha1"
-	"encoding/binary"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -111,38 +110,35 @@ func raw(o Object) ([]byte, error) {
 	}
 
 	// calculate length of data (content of the object) as byte slice
-	length := new(bytes.Buffer)
-	err = binary.Write(length, binary.LittleEndian, len(data))
-	if err != nil {
-		return nil, err
-	}
+	length := []byte(strconv.Itoa(len(data)))
 
 	// create headers of the object. Sample header:
 	//
 	// commit 1086.tree 29ff16c9c14e265 2b22f8b78bb08a5a
 	// <type> <len><0x0><contents>
 	result := append([]byte(o.name()), []byte{' '}...)
-	result = append(result, length.Bytes()...)
+	result = append(result, length...)
 	result = append(result, []byte{0x0}...)
 	result = append(result, data...)
 
 	return result, nil
 }
 
-// getHash returns SHA1 hash of a byte slice
-func getHash(o []byte) (string, error) {
-	sha := sha1.Sum(o)
-	return hex.EncodeToString(sha[:]), nil
+// Hash returns the "raw" object along with its hash
+func Hash(o Object) ([]byte, string, error) {
+	r, err := raw(o)
+	if err != nil {
+		return nil, "", err
+	}
+
+	sha := sha1.Sum(r)
+	return r, hex.EncodeToString(sha[:]), nil
 }
 
 func Write(o Object) error {
-	// calculate hash of the object and use it as path of the object
-	r, err := raw(o)
-	if err != nil {
-		return err
-	}
-
-	hash, err := getHash(r)
+	// create a raw object with all headers and create its hash
+	// Hash is used as a path for the object
+	r, hash, err := Hash(o)
 	if err != nil {
 		return err
 	}

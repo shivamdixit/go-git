@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 
@@ -29,12 +30,13 @@ const (
 
 var initCmd *flag.FlagSet
 var catFileCmd *flag.FlagSet
+var hashObjectCmd *flag.FlagSet
 
 func init() {
 	catFileCmd = flag.NewFlagSet(catFile, flag.ExitOnError)
 	// checkoutCmd := flag.NewFlagSet(checkout, flag.ExitOnError)
 	// commitCmd := flag.NewFlagSet(commit, flag.ExitOnError)
-	// hashObjectCmd := flag.NewFlagSet(hashObject, flag.ExitOnError)
+	hashObjectCmd = flag.NewFlagSet(hashObject, flag.ExitOnError)
 	initCmd = flag.NewFlagSet(initialize, flag.ExitOnError)
 	// logCmd := flag.NewFlagSet(log, flag.ExitOnError)
 	// lsTreeCmd := flag.NewFlagSet(lsTree, flag.ExitOnError)
@@ -69,6 +71,30 @@ func catFileExec(objectType string, path string) {
 	fmt.Print(result)
 }
 
+func hashObjectExec(path string) {
+	// TODO: repository is only required if write flag is present
+	// fetch the repository from current directory
+	_, err := git.Find(".")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// TODO: add support for different types of git objects
+	o := git.NewBlob(data)
+	r, hash, err := git.Hash(o)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("raw object is: %s", r)
+	fmt.Printf("hash is: %s", hash)
+}
+
 func main() {
 	// providing a subcommand is must
 	if len(os.Args) < 2 {
@@ -82,6 +108,9 @@ func main() {
 		break
 	case catFile:
 		catFileCmd.Parse(os.Args[2:])
+		break
+	case hashObject:
+		hashObjectCmd.Parse(os.Args[2:])
 		break
 	default:
 		flag.PrintDefaults()
@@ -111,5 +140,15 @@ func main() {
 		}
 
 		catFileExec(os.Args[2], os.Args[3])
+	}
+
+	if hashObjectCmd.Parsed() {
+		// TODO: implement write and type flags
+		// when write flag is specified then repository is mandatory
+		if len(os.Args) < 3 {
+			log.Fatal("missing OBJECT")
+		}
+
+		hashObjectExec(os.Args[2])
 	}
 }

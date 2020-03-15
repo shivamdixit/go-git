@@ -23,5 +23,5 @@ func (b Blob) Deserialize(data []byte) error {
 }
 
 func NewBlob(data []byte) *Blob {
-	return &Blob{}
+	return &Blob{data: data}
 }
