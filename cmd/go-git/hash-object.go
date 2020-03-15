@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/shivamdixit/go-git/git"
+	"github.com/shivamdixit/go-git/git/object"
 )
 
 var hashObjectType string
@@ -35,25 +36,25 @@ func hashObjectExec(args []string) {
 		log.Fatal(err)
 	}
 
-	var o git.Object
+	var o object.Object
 	switch hashObjectType {
-	case git.ObjectBlob:
-		o = git.NewBlob(data)
+	case object.TypeBlob:
+		o = object.NewBlob(data)
 		break
-	case git.ObjectTree:
-		o = git.NewTree(data)
+	case object.TypeTree:
+		o = object.NewTree(data)
 		break
-	case git.ObjectCommit:
-		o = git.NewCommit(data)
+	case object.TypeCommit:
+		o = object.NewCommit(data)
 		break
-	case git.ObjectTag:
-		o = git.NewTag(data)
+	case object.TypeTag:
+		o = object.NewTag(data)
 		break
 	default:
 		log.Fatalf("invalid object type: %s", hashObjectType)
 	}
 
-	_, hash, err := git.Hash(o)
+	_, hash, err := object.Hash(o)
 	if err != nil {
 		log.Fatal(err)
 	}

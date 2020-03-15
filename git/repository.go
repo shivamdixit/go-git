@@ -59,9 +59,9 @@ func (r *Repository) dir(p string, mkdir bool) (string, error) {
 }
 
 // same as dir() function, but for a file. It will instantiate the path
-// corresponding to a file. For example: file("a/b/c/HEAD"), will create
+// corresponding to a file. For example: File("a/b/c/HEAD"), will create
 // all the sub-directories, i.e.,`.git/a/b/c/`
-func (r *Repository) file(p string, mkdir bool) (string, error) {
+func (r *Repository) File(p string, mkdir bool) (string, error) {
 	// only pass the directory path, not the filename itself
 	// to dir() function to create all the sub-directories, if not exists
 	_, err := r.dir(filepath.Dir(p), mkdir)
@@ -152,7 +152,7 @@ func validate(repo *Repository) error {
 }
 
 func initializeFile(r *Repository, relPath string, content []byte) error {
-	p, err := r.file(relPath, true)
+	p, err := r.File(relPath, true)
 	if err != nil {
 		return err
 	}

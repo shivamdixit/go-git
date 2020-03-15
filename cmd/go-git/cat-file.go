@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/shivamdixit/go-git/git"
+	"github.com/shivamdixit/go-git/git/object"
 )
 
 var catFileType bool
@@ -55,7 +56,7 @@ func catFileExec(catFileCmd *flag.FlagSet) {
 		log.Fatal(err)
 	}
 
-	obj, err := git.Read(r, catFileCmd.Args()[0])
+	obj, err := object.Read(r, catFileCmd.Args()[0])
 	if err != nil {
 		log.Fatal(err)
 	}

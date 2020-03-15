@@ -1,12 +1,14 @@
-package git
+package object
+
+import "github.com/shivamdixit/go-git/git"
 
 type Tree baseObject
 
 func (t Tree) Name() string {
-	return ObjectTree
+	return TypeTree
 }
 
-func (t Tree) repository() *Repository {
+func (t Tree) repository() *git.Repository {
 	return t.repo
 }
 

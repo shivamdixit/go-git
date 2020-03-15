@@ -1,12 +1,14 @@
-package git
+package object
+
+import "github.com/shivamdixit/go-git/git"
 
 type Commit baseObject
 
 func (c Commit) Name() string {
-	return ObjectCommit
+	return TypeCommit
 }
 
-func (c Commit) repository() *Repository {
+func (c Commit) repository() *git.Repository {
 	return c.repo
 }
 

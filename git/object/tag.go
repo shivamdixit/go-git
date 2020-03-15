@@ -1,12 +1,14 @@
-package git
+package object
+
+import "github.com/shivamdixit/go-git/git"
 
 type Tag baseObject
 
 func (t Tag) Name() string {
-	return ObjectTag
+	return TypeTag
 }
 
-func (t Tag) repository() *Repository {
+func (t Tag) repository() *git.Repository {
 	return t.repo
 }
 

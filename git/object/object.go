@@ -1,4 +1,4 @@
-package git
+package object
 
 import (
 	"bytes"
@@ -10,36 +10,38 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"strconv"
+
+	"github.com/shivamdixit/go-git/git"
 )
 
 // baseObject is the type for all high level objects like
 // commit, tag, blob, etc.
 type baseObject struct {
-	repo *Repository
+	repo *git.Repository
 	data []byte
 }
 
 // Object interface represents a generic high level git object
 type Object interface {
 	Name() string
-	repository() *Repository
+	repository() *git.Repository
 	Serialize() ([]byte, error)
 	Deserialize([]byte) error
 }
 
 // Different types of objects supported by git
 const (
-	ObjectCommit = "commit"
-	ObjectTree   = "tree"
-	ObjectTag    = "tag"
-	ObjectBlob   = "blob"
+	TypeCommit = "commit"
+	TypeTree   = "tree"
+	TypeTag    = "tag"
+	TypeBlob   = "blob"
 )
 
 // Read reads a given git object in a repository
-func Read(r *Repository, sha string) (Object, error) {
+func Read(r *git.Repository, sha string) (Object, error) {
 	// get the path of the object. First two bytes of the hash
 	// are used to identify the directory, remaining are used as a file name.
-	path, err := r.file(filepath.Join("objects", sha[:2], sha[2:]), false)
+	path, err := r.File(filepath.Join("objects", sha[:2], sha[2:]), false)
 	if err != nil {
 		return nil, err
 	}
@@ -80,13 +82,13 @@ func Read(r *Repository, sha string) (Object, error) {
 
 	var o Object
 	switch string(objType) {
-	case ObjectCommit:
+	case TypeCommit:
 		o = NewCommit(rawBytes[j:])
-	case ObjectTree:
+	case TypeTree:
 		o = NewTree(rawBytes[j:])
-	case ObjectTag:
+	case TypeTag:
 		o = NewTag(rawBytes[j:])
-	case ObjectBlob:
+	case TypeBlob:
 		o = NewBlob(rawBytes[j:])
 	default:
 		return nil, fmt.Errorf("invalid object type :%s", objType)
@@ -97,7 +99,7 @@ func Read(r *Repository, sha string) (Object, error) {
 
 // FindObj finds a git object as an object can be referenced by
 // full hash, short hash, tags, etc.
-func FindObj(r *Repository, name string) string {
+func FindObj(r *git.Repository, name string) string {
 	// TODO: implement find logic
 	return name
 }
@@ -143,7 +145,7 @@ func Write(o Object) error {
 		return err
 	}
 
-	p, err := o.repository().file(filepath.Join("objects", hash[:2], hash[2:]), true)
+	p, err := o.repository().File(filepath.Join("objects", hash[:2], hash[2:]), true)
 	if err != nil {
 		return err
 	}

@@ -1,12 +1,14 @@
-package git
+package object
+
+import "github.com/shivamdixit/go-git/git"
 
 type Blob baseObject
 
 func (b Blob) Name() string {
-	return ObjectBlob
+	return TypeBlob
 }
 
-func (b Blob) repository() *Repository {
+func (b Blob) repository() *git.Repository {
 	return b.repo
 }
 
