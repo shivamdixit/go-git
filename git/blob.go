@@ -2,7 +2,7 @@ package git
 
 type Blob baseObject
 
-func (b Blob) name() string {
+func (b Blob) Name() string {
 	return ObjectBlob
 }
 

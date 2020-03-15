@@ -2,7 +2,7 @@ package git
 
 type Tree baseObject
 
-func (t Tree) name() string {
+func (t Tree) Name() string {
 	return ObjectTree
 }
 

@@ -21,7 +21,7 @@ type baseObject struct {
 
 // Object interface represents a generic high level git object
 type Object interface {
-	name() string
+	Name() string
 	repository() *Repository
 	Serialize() ([]byte, error)
 	Deserialize([]byte) error
@@ -116,7 +116,7 @@ func raw(o Object) ([]byte, error) {
 	//
 	// commit 1086.tree 29ff16c9c14e265 2b22f8b78bb08a5a
 	// <type> <len><0x0><contents>
-	result := append([]byte(o.name()), []byte{' '}...)
+	result := append([]byte(o.Name()), []byte{' '}...)
 	result = append(result, length...)
 	result = append(result, []byte{0x0}...)
 	result = append(result, data...)

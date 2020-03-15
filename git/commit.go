@@ -2,7 +2,7 @@ package git
 
 type Commit baseObject
 
-func (c Commit) name() string {
+func (c Commit) Name() string {
 	return ObjectCommit
 }
 

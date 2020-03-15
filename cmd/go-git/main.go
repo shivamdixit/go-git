@@ -3,11 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"os"
-
-	"github.com/shivamdixit/go-git/git"
 )
 
 // List of commands supported by go-git
@@ -32,6 +28,42 @@ var initCmd *flag.FlagSet
 var catFileCmd *flag.FlagSet
 var hashObjectCmd *flag.FlagSet
 
+var defaultMessage = `
+These are common Git commands used in various situations:
+
+start a working area (see also: git help tutorial)
+   clone     Clone a repository into a new directory
+   init      Create an empty Git repository or reinitialize an existing one
+
+work on the current change (see also: git help everyday)
+   add       Add file contents to the index
+   mv        Move or rename a file, a directory, or a symlink
+   restore   Restore working tree files
+   rm        Remove files from the working tree and from the index
+
+examine the history and state (see also: git help revisions)
+   bisect    Use binary search to find the commit that introduced a bug
+   diff      Show changes between commits, commit and working tree, etc
+   grep      Print lines matching a pattern
+   log       Show commit logs
+   show      Show various types of objects
+   status    Show the working tree status
+
+grow, mark and tweak your common history
+   branch    List, create, or delete branches
+   commit    Record changes to the repository
+   merge     Join two or more development histories together
+   rebase    Reapply commits on top of another base tip
+   reset     Reset current HEAD to the specified state
+   switch    Switch branches
+   tag       Create, list, delete or verify a tag object signed with GPG
+
+collaborate (see also: git help workflows)
+   fetch     Download objects and refs from another repository
+   pull      Fetch from and integrate with another repository or a local branch
+   push      Update remote refs along with associated objects
+`
+
 func init() {
 	catFileCmd = flag.NewFlagSet(catFile, flag.ExitOnError)
 	// checkoutCmd := flag.NewFlagSet(checkout, flag.ExitOnError)
@@ -46,59 +78,24 @@ func init() {
 	// rmCmd := flag.NewFlagSet(rm, flag.ExitOnError)
 	// showRefCmd := flag.NewFlagSet(showRef, flag.ExitOnError)
 	// tagCmd := flag.NewFlagSet(tag, flag.ExitOnError)
-}
 
-func initExec(path string) {
-	err := git.Create(path)
-	if err != nil {
-		fmt.Printf("failed: %s", err)
-	}
-}
+	// Define the default usage for the git command
+	flag.Usage = func() {
+		fmt.Fprintf(flag.CommandLine.Output(), "%s: missing subcommand.\n%s", os.Args[0], defaultMessage)
 
-func catFileExec(objectType string, path string) {
-	// fetch the repository from current directory
-	r, err := git.Find(".")
-	if err != nil {
-		log.Fatal(err)
+		hashObjectCmd.PrintDefaults()
 	}
 
-	c, err := git.Read(r, path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	result, err := c.Serialize()
-	fmt.Print(result)
-}
-
-func hashObjectExec(path string) {
-	// TODO: repository is only required if write flag is present
-	// fetch the repository from current directory
-	_, err := git.Find(".")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// TODO: add support for different types of git objects
-	o := git.NewBlob(data)
-	r, hash, err := git.Hash(o)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Printf("raw object is: %s", r)
-	fmt.Printf("hash is: %s", hash)
+	// Initialize all the subcommands
+	initCmdInit(initCmd)
+	hashObjectInit(hashObjectCmd)
+	catFileInit(catFileCmd)
 }
 
 func main() {
 	// providing a subcommand is must
 	if len(os.Args) < 2 {
-		flag.PrintDefaults()
+		flag.Usage()
 		os.Exit(1)
 	}
 
@@ -113,42 +110,29 @@ func main() {
 		hashObjectCmd.Parse(os.Args[2:])
 		break
 	default:
-		flag.PrintDefaults()
+		flag.Usage()
 		os.Exit(1)
 	}
 
 	if initCmd.Parsed() {
-		// path is optional positional argument
-		var dir string
-		if len(os.Args) < 3 {
-			d, err := os.Getwd()
-			if err != nil {
-				fmt.Errorf("cannot determine current directory %s", err)
-				os.Exit(1)
-			}
-			dir = d
-		} else {
-			dir = os.Args[2]
-		}
-
-		initExec(dir)
+		initCmdExec(initCmd.Args())
 	}
 
 	if catFileCmd.Parsed() {
-		if len(os.Args) < 4 {
-			log.Fatal("missing TYPE or OBJECT")
+		if len(catFileCmd.Args()) < 1 {
+			catFileCmd.Usage()
+			os.Exit(1)
 		}
 
-		catFileExec(os.Args[2], os.Args[3])
+		catFileExec(catFileCmd)
 	}
 
 	if hashObjectCmd.Parsed() {
-		// TODO: implement write and type flags
-		// when write flag is specified then repository is mandatory
-		if len(os.Args) < 3 {
-			log.Fatal("missing OBJECT")
+		if len(hashObjectCmd.Args()) < 1 {
+			hashObjectCmd.Usage()
+			os.Exit(1)
 		}
 
-		hashObjectExec(os.Args[2])
+		hashObjectExec(hashObjectCmd.Args())
 	}
 }

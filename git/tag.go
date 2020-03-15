@@ -2,7 +2,7 @@ package git
 
 type Tag baseObject
 
-func (t Tag) name() string {
+func (t Tag) Name() string {
 	return ObjectTag
 }
 
